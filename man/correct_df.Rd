@@ -7,7 +7,7 @@
 correct_df(
   data = df_corrected,
   metric = "",
-  Jurisdiction = "",
+  jurisdiction = "",
   correction_date = "",
   corrected_value = ""
 )
@@ -17,7 +17,7 @@ correct_df(
 
 \item{metric}{choice between updating "cases" or "deaths" = other text inputs will be ignored}
 
-\item{Jurisdiction}{region that is being corrected. Only takes one input}
+\item{jurisdiction}{region that is being corrected. Only takes one input}
 
 \item{correction_date}{date that you want to make correction for}
 
@@ -27,5 +27,8 @@ correct_df(
 
 }
 \description{
-This function allows one to make corrections to webscraped case and death data in a more intuitive syntax
+This function allows one to make corrections to webscraped case and death data with a more intuitive syntax.
+}
+\examples{
+
 }

@@ -4,7 +4,7 @@
 #'
 #' @param data              dataset you wish to correct. df_corrected data set as default
 #' @param metric            choice between updating "cases" or "deaths" = other text inputs will be ignored
-#' @param jurisdiction      region that is being corrected. Only takes one input
+#' @param Jurisdiction      region that is being corrected. Only takes one input
 #' @param correction_date   date that you want to make correction for
 #' @param corrected_value   new input value
 #'

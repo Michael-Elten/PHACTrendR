@@ -10,7 +10,7 @@
 #' @export
 #'
 #' @examples
-recode_PT_names_to_small <- function(dataset, geo_variable = "jurisdiction") {
+recode_PT_names_to_small <- function(dataset, geo_variable = "Jurisdiction") {
   if (class(dataset)[1]=="character"){
     dataset<-dplyr::recode(dataset,
                     "British Columbia"="BC",
@@ -63,7 +63,7 @@ recode_PT_names_to_small <- function(dataset, geo_variable = "jurisdiction") {
 #' @export
 #'
 #' @examples
-recode_PT_names_to_big <- function(dataset, geo_variable = "jurisdiction") {
+recode_PT_names_to_big <- function(dataset, geo_variable = "Jurisdiction") {
   if (class(dataset)[1]=="character"){
     dataset<-dplyr::recode(dataset,
                     "BC" = "British Columbia",

@@ -253,8 +253,7 @@ all_hosp_data<-bind_rows(combined_hosp_data,Canada_hosp_data) %>%
   recode_PT_names_to_big() %>%
   factor_PT_west_to_east(size="big") %>%
   pivot_longer("hospitalized":"icu", names_to = "type", values_to = "cases") %>%
-  mutate(Date=as.Date(Date)) %>%
-  filter(Date <= params$date)
+  mutate(Date=as.Date(Date))
 
 pt_hosp_icu<-all_hosp_data %>%
   filter(!Jurisdiction=="Repatriated travellers")

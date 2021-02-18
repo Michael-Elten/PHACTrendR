@@ -4,10 +4,12 @@
 \alias{recode_PT_names_to_small}
 \title{Recode_pt_names_to_small}
 \usage{
-recode_PT_names_to_small(dataset, geo_variable = "Jurisdiction")
+recode_PT_names_to_small(dataset, geo_variable = "jurisdiction")
 }
 \arguments{
-\item{geo_variable}{}
+\item{dataset}{(required) the dataset of interest. Can be a data.frame, tibble, or even just a character vector}
+
+\item{geo_variable}{(optional) if the dataset is not a character vector, designate the geographical variable of interest (defaults to "jurisdiction")}
 }
 \value{
 

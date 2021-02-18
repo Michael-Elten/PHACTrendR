@@ -13,7 +13,7 @@
 #'
 #' @examples
 #'
-correct_df<-function(data=df_corrected,metric="",jurisdiction="",correction_date="",corrected_value=""){
+correct_df<-function(data,metric="",Jurisdiction="",correction_date="",corrected_value=""){
   correction_date=as.Date(correction_date)
   if (metric=="cases"){
     data[data$prname==Jurisdiction & data$date==correction_date, "numtoday"]<-corrected_value

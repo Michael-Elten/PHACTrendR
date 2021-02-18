@@ -20,4 +20,6 @@ Imports:
     cansim,
     readxl,
     lubridate,
-    metabaser
+    metabaser,
+    googlesheets4,
+    rvest

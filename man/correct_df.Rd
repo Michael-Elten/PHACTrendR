@@ -5,9 +5,9 @@
 \title{Hardcode changes to web scraped PT cases and deaths}
 \usage{
 correct_df(
-  data = df_corrected,
+  data,
   metric = "",
-  jurisdiction = "",
+  Jurisdiction = "",
   correction_date = "",
   corrected_value = ""
 )
@@ -17,11 +17,11 @@ correct_df(
 
 \item{metric}{choice between updating "cases" or "deaths" = other text inputs will be ignored}
 
-\item{jurisdiction}{region that is being corrected. Only takes one input}
-
 \item{correction_date}{date that you want to make correction for}
 
 \item{corrected_value}{new input value}
+
+\item{jurisdiction}{region that is being corrected. Only takes one input}
 }
 \value{
 

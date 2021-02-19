@@ -143,22 +143,22 @@ return(df_int)
 #'
 #' @examples
 import_demographic_data<-function(){
-pt_pop_raw <- get_cansim("17-10-0005-01")
+pt_pop_raw <- cansim::get_cansim("17-10-0005-01")
 
 #Filter to latest year of data
 latest_can_pop <- pt_pop_raw %>%
-  mutate(REF_DATE=as.numeric(REF_DATE)) %>%
-  filter(`Age group`=="All ages",REF_DATE==max(REF_DATE),Sex=="Both sexes") %>%
-  select(GEO,VALUE) %>%
+  dplyr::mutate(REF_DATE=as.numeric(REF_DATE)) %>%
+  dplyr::filter(`Age group`=="All ages",REF_DATE==max(REF_DATE),Sex=="Both sexes") %>%
+  dplyr::select(GEO,VALUE) %>%
   dplyr::rename(Population=VALUE,
                 Jurisdiction=GEO)
 
 
 #Deriving population 20 year age groups
 pt_pop20 <- pt_pop_raw %>%
-  mutate(REF_DATE=as.numeric(REF_DATE)) %>%
-  filter(str_detect(`Age group`, "to|90 years and over"),REF_DATE==max(REF_DATE),Sex=="Both sexes") %>%
-  mutate(age_group_20=case_when(`Age group`=="0 to 4 years" ~ "0 to 19",
+  dplyr::mutate(REF_DATE=as.numeric(REF_DATE)) %>%
+  dplyr::filter(str_detect(`Age group`, "to|90 years and over"),REF_DATE==max(REF_DATE),Sex=="Both sexes") %>%
+  dplyr::mutate(age_group_20=case_when(`Age group`=="0 to 4 years" ~ "0 to 19",
                                 `Age group`=="5 to 9 years" ~ "0 to 19",
                                 `Age group`=="10 to 14 years" ~ "0 to 19",
                                 `Age group`=="15 to 19 years" ~ "0 to 19",
@@ -178,11 +178,11 @@ pt_pop20 <- pt_pop_raw %>%
                                 `Age group`=="85 to 89 years" ~ "80 or plus",
                                 `Age group`=="90 years and over" ~ "80 or plus",
                                 TRUE ~ "remove")) %>%
-  filter(!age_group_20=="remove") %>%
-  select(GEO,VALUE, age_group_20) %>%
-  group_by(GEO, age_group_20) %>%
-  summarise(Population=sum(VALUE)) %>%
-  rename(Jurisdiction=GEO,
+  dplyr::filter(!age_group_20=="remove") %>%
+  dplyr::select(GEO,VALUE, age_group_20) %>%
+  dplyr::group_by(GEO, age_group_20) %>%
+  dplyr::summarise(Population=sum(VALUE)) %>%
+  dplyr::rename(Jurisdiction=GEO,
          AgeGroup20=age_group_20,
          Population20=Population)
 return(list(latest_can_pop,pt_pop20))

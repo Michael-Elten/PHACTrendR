@@ -215,11 +215,9 @@ format_labtesting_table<-function(input_table){
   ft <- color(ft, j = "Weekly Change in Percent Positivity", i = ~ str_detect(`Weekly Change in Percent Positivity`, "\\-"), color="green4")
 
   ft_1 <- footnote(ft, value = as_paragraph(
-    paste0("Updated Mondays. Data as of: ", format(max(SALT4$Date), "%B %d"))),
+    paste0("Note: Lab testing numbers may vary slightly as PTs continually update lab testing data. Updated Mondays. Data as of: ", format(max(SALT4$Date), "%B %d"))),
     ref_symbols = c(""),
     part = "header")
-
-
 
   return(ft_1)
 }

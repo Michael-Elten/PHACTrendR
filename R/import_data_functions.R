@@ -162,7 +162,9 @@ return(df_int)
 #'
 #' @return
 #'
-#' list with 2 values. First value: latest_can_pop. Second value: pt_pop_20
+#' list with 2 values. First value: latest_can_pop. Second value: pt_pop_20.
+#'
+#' Note - this function is optional, these two datasets are also stored as R data in this package
 #'
 #' @export
 #'
@@ -301,8 +303,9 @@ import_case_report_form_data<-function(method="extract"){
 if (method=="extract"){
 qry_cases_raw <- readRDS("Y:/PHAC/IDPCB/CIRID/VIPS-SAR/EMERGENCY PREPAREDNESS AND RESPONSE HC4/EMERGENCY EVENT/WUHAN UNKNOWN PNEU - 2020/EPI SUMMARY/Trend analysis/_Current/_Source Data/CaseReportForm/trend_extract.rds") %>%
   dplyr::mutate(onsetdate = as.Date(onsetdate),
-         episodedate=as.Date(episodedate),
-         earliestlabcollectiondate = as.Date(earliestlabcollectiondate)) %>%
+                episodedate=as.Date(episodedate),
+                earliestlabcollectiondate = as.Date(earliestlabcollectiondate),
+                earliestdate=as.Date(earliestdate)) %>%
   dplyr::rename(age=age_years)
 } else if (method=="metabaser"){
 
@@ -315,27 +318,27 @@ handle<- metabaser::metabase_login(base_url = "https://discover-metabase.hres.ca
                             username = metabase_user,
                             password = metabase_pass)
 
-qry_cases_raw <- metabaser::metabase_query(handle, "select phacid, phacreporteddate, episodedate, pt, age_years, agegroup10, agegroup20, onsetdate, earliestlabcollectiondate, sex, gender, sexgender, coviddeath, hosp, icu, exposure_cat from all_cases;") %>%
+qry_cases_raw <- metabaser::metabase_query(handle, "select phacid, phacreporteddate, episodedate, earliestdate, pt, age_years, agegroup10, agegroup20, onsetdate, earliestlabcollectiondate, sex, gender, sexgender, coviddeath, hosp, icu, exposure_cat from all_cases;") %>%
 rename(age=age_years)
 }
 
   qry_canada <- qry_cases_raw %>%
     janitor::clean_names() %>%
-    select(phacid, pt, episodedate, age, agegroup10, agegroup20) %>%
+    select(phacid, pt, earliestdate, age, agegroup10, agegroup20) %>%
     filter(!is.na(age)) %>%
-    group_by(episodedate, agegroup20) %>%
+    group_by(earliestdate, agegroup20) %>%
     tally() %>%
     mutate(Jurisdiction = "Canada") %>%
-    filter(!is.na(episodedate))
+    filter(!is.na(earliestdate))
 
   qry_cases <- qry_cases_raw %>%
     janitor::clean_names() %>%
-    select(phacid, pt, episodedate, age, agegroup10, agegroup20) %>%
+    select(phacid, pt, earliestdate, age, agegroup10, agegroup20) %>%
     mutate(Jurisdiction = toupper(pt)) %>%
     recode_PT_names_to_big() %>%
-    group_by(episodedate, agegroup20, Jurisdiction) %>%
+    group_by(earliestdate, agegroup20, Jurisdiction) %>%
     dplyr::tally() %>%
-    dplyr::filter(!is.na(episodedate)) %>%
+    dplyr::filter(!is.na(earliestdate)) %>%
     dplyr::bind_rows(qry_canada) %>%
     filter(Jurisdiction %in% c("Canada", recode_PT_names_to_big(PHACTrendR::PTs_big6))) %>%
     factor_PT_west_to_east(Canada_first=TRUE, size="big") %>%

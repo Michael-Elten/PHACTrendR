@@ -1,1 +1,4 @@
 exportPattern("^[[:alpha:]]+")
+importFrom(magrittr,"%>%")
+importFrom(dplyr,"select","mutate","filter","group_by","ungroup","summarise","left_join","arrange","rename","tally","bind_rows")
+importFrom(readr,"read_csv")

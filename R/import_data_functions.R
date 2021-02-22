@@ -1,26 +1,51 @@
 #import data functions
 
-#' Import web-scraped case and death numbers, and apply hardcode corrections
+
+#' Import raw web-scraped case and death numbers, and apply hardcode corrections
+#'
+#'
+#'
 #'
 #' @return
 #' @export
 #'
 #' @examples
-import_case_death_data<-function(){
-df_raw <- read_csv("https://health-infobase.canada.ca/src/data/covidLive/covid19.csv") %>%
-  mutate(date = as.Date(date, format = "%d-%m-%Y"))
+import_raw_case_death_data<-function(){
+  df_raw <- readr::read_csv("https://health-infobase.canada.ca/src/data/covidLive/covid19.csv") %>%
+    dplyr::mutate(date = as.Date(date, format = "%d-%m-%Y")) %>%
+    rename(Jurisdiction=prname,
+           Jurisdiction_FR=prnameFR)
+  return(df_raw)
+}
+
+
+#' Import corrected web-scraped case and death numbers, and apply hardcode corrections
+#'
+#' Corrections for data dumps, etc. Note - don't use cumulative totals from this, as they are missing some cases that could not be assigned specific dates.
+#'
+#'
+#'
+#' @return
+#' @export
+#'
+#' @examples
+import_adjusted_case_death_data<-function(){
+df_raw <- readr::read_csv("https://health-infobase.canada.ca/src/data/covidLive/covid19.csv") %>%
+  dplyr::mutate(date = as.Date(date, format = "%d-%m-%Y")) %>%
+  rename(Jurisdiction=prname,
+         Jurisdiction_FR=prnameFR)
 
 
 #Removing trailing unreported days from PTs, in the past 7 days.
 df<-df_raw %>%
-  group_by(prname) %>%
-  filter(!(!prname %in% c("Canada", "Repatriated travellers")&date==max(date)&update==FALSE)) %>%
-  filter(!(!prname %in% c("Canada", "Repatriated travellers")&date==max(date)&update==FALSE)) %>%
-  filter(!(!prname %in% c("Canada", "Repatriated travellers")&date==max(date)&update==FALSE)) %>%
-  filter(!(!prname %in% c("Canada", "Repatriated travellers")&date==max(date)&update==FALSE)) %>%
-  filter(!(!prname %in% c("Canada", "Repatriated travellers")&date==max(date)&update==FALSE)) %>%
-  filter(!(!prname %in% c("Canada", "Repatriated travellers")&date==max(date)&update==FALSE)) %>%
-  filter(!(!prname %in% c("Canada", "Repatriated travellers")&date==max(date)&update==FALSE))
+  dplyr::group_by(Jurisdiction) %>%
+  dplyr::filter(!(!Jurisdiction %in% c("Canada", "Repatriated travellers")&date==max(date)&update==FALSE)) %>%
+  dplyr::filter(!(!Jurisdiction %in% c("Canada", "Repatriated travellers")&date==max(date)&update==FALSE)) %>%
+  dplyr::filter(!(!Jurisdiction %in% c("Canada", "Repatriated travellers")&date==max(date)&update==FALSE)) %>%
+  dplyr::filter(!(!Jurisdiction %in% c("Canada", "Repatriated travellers")&date==max(date)&update==FALSE)) %>%
+  dplyr::filter(!(!Jurisdiction %in% c("Canada", "Repatriated travellers")&date==max(date)&update==FALSE)) %>%
+  dplyr::filter(!(!Jurisdiction %in% c("Canada", "Repatriated travellers")&date==max(date)&update==FALSE)) %>%
+  dplyr::filter(!(!Jurisdiction %in% c("Canada", "Repatriated travellers")&date==max(date)&update==FALSE))
 
 df_corrected<-df %>%
   select(-numtotal,-numdeaths)
@@ -97,8 +122,8 @@ df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Sask
 
 #getting corrected values for the national number now
 can_corrected_case_death<-df_corrected %>%
-  filter(!prname=="Canada") %>%
-  select(prname, date, numtoday, numdeathstoday) %>%
+  filter(!Jurisdiction=="Canada") %>%
+  select(Jurisdiction, date, numtoday, numdeathstoday) %>%
   group_by(date) %>%
   summarise(can_numtoday=sum(numtoday, na.rm = TRUE),
             can_deathstoday=sum(numdeathstoday, na.rm = TRUE)) %>%
@@ -106,16 +131,16 @@ can_corrected_case_death<-df_corrected %>%
 
 df_corrected2<-df_corrected %>%
   dplyr::left_join(can_corrected_case_death, by = "date") %>%
-  dplyr::mutate(numtoday=ifelse(prname=="Canada", can_numtoday, numtoday),
-         numdeathstoday=ifelse(prname=="Canada",can_deathstoday,numdeathstoday),
+  dplyr::mutate(numtoday=ifelse(Jurisdiction=="Canada", can_numtoday, numtoday),
+         numdeathstoday=ifelse(Jurisdiction=="Canada",can_deathstoday,numdeathstoday),
          numtoday=as.numeric(numtoday),
          numdeathstoday=as.numeric(numdeathstoday)) %>%
   dplyr::select(-can_numtoday, -can_deathstoday)%>%
-  dplyr::group_by(prname)%>%
+  dplyr::group_by(Jurisdiction)%>%
   dplyr::mutate(numtotal=cumsum(numtoday),
          numdeaths=cumsum(numdeathstoday))
 
-return(list(df_raw,df_corrected2))
+return(df_corrected2)
 }
 
 
@@ -202,8 +227,8 @@ return(list(latest_can_pop,pt_pop20))
 import_hosp_data<-function(){
 googlesheets4::gs4_deauth()
 hosp_data_raw<-googlesheets4::read_sheet("https://docs.google.com/spreadsheets/d/17KL40qJ8tpFalFeBv1XDopTXaFm7z3Q9J2dtqqsQaJg/edit?usp=sharing", sheet="hosp_and_icu") %>%
-  filter(!Jurisdiction=="AB") %>%
-  mutate(hosp=parse_number(as.character(hosp)),
+  dplyr::filter(!Jurisdiction=="AB") %>%
+  dplyr::mutate(hosp=parse_number(as.character(hosp)),
          icu=parse_number(as.character(icu)))
 
 # First scraped data for Alberta
@@ -254,11 +279,11 @@ all_hosp_data<-bind_rows(combined_hosp_data,Canada_hosp_data) %>%
   factor_PT_west_to_east(size="big") %>%
   pivot_longer("hospitalized":"icu", names_to = "type", values_to = "cases") %>%
   mutate(Date=as.Date(Date))
+#
+# pt_hosp_icu<-all_hosp_data %>%
+#   filter(!Jurisdiction=="Repatriated travellers")
 
-pt_hosp_icu<-all_hosp_data %>%
-  filter(!Jurisdiction=="Repatriated travellers")
-
-return(pt_hosp_icu)
+return(all_hosp_data)
 }
 
 
@@ -275,49 +300,49 @@ import_case_report_form_data<-function(method="extract"){
 
 if (method=="extract"){
 qry_cases_raw <- readRDS("Y:/PHAC/IDPCB/CIRID/VIPS-SAR/EMERGENCY PREPAREDNESS AND RESPONSE HC4/EMERGENCY EVENT/WUHAN UNKNOWN PNEU - 2020/EPI SUMMARY/Trend analysis/_Current/_Source Data/CaseReportForm/trend_extract.rds") %>%
-  mutate(onsetdate = as.Date(onsetdate),
+  dplyr::mutate(onsetdate = as.Date(onsetdate),
          episodedate=as.Date(episodedate),
          earliestlabcollectiondate = as.Date(earliestlabcollectiondate)) %>%
-  rename(age=age_years)
+  dplyr::rename(age=age_years)
 } else if (method=="metabaser"){
 
 #need to find solution for safely storing and accessing metabase credentials!
 metabase_user='**********'
 metabase_pass='**********'
 
-handle<- metabase_login(base_url = "https://discover-metabase.hres.ca/api",
+handle<- metabaser::metabase_login(base_url = "https://discover-metabase.hres.ca/api",
                             database_id = 2, # phac database
                             username = metabase_user,
                             password = metabase_pass)
 
-qry_cases_raw <- metabase_query(handle, "select phacid, phacreporteddate, episodedate, pt, age_years, agegroup10, agegroup20, onsetdate, earliestlabcollectiondate, sex, gender, sexgender, coviddeath, hosp, icu, exposure_cat from all_cases;") %>%
+qry_cases_raw <- metabaser::metabase_query(handle, "select phacid, phacreporteddate, episodedate, pt, age_years, agegroup10, agegroup20, onsetdate, earliestlabcollectiondate, sex, gender, sexgender, coviddeath, hosp, icu, exposure_cat from all_cases;") %>%
 rename(age=age_years)
 }
 
   qry_canada <- qry_cases_raw %>%
-    clean_names() %>%
+    janitor::clean_names() %>%
     select(phacid, pt, episodedate, age, agegroup10, agegroup20) %>%
     filter(!is.na(age)) %>%
     group_by(episodedate, agegroup20) %>%
     tally() %>%
-    mutate(prname = "Canada") %>%
+    mutate(Jurisdiction = "Canada") %>%
     filter(!is.na(episodedate))
 
   qry_cases <- qry_cases_raw %>%
-    clean_names() %>%
+    janitor::clean_names() %>%
     select(phacid, pt, episodedate, age, agegroup10, agegroup20) %>%
-    mutate(prname = toupper(pt)) %>%
-    recode_PT_names_to_big(geo_variable="prname") %>%
-    group_by(episodedate, agegroup20, prname) %>%
-    tally() %>%
-    filter(!is.na(episodedate)) %>%
-    bind_rows(qry_canada) %>%
-    filter(prname %in% c("Canada", "British Columbia", "Alberta", "Saskatchewan", "Manitoba", "Ontario", "Quebec")) %>%
-    mutate(prname = factor(prname, c("Canada", "British Columbia", "Alberta", "Saskatchewan", "Manitoba", "Ontario", "Quebec"))) %>%
+    mutate(Jurisdiction = toupper(pt)) %>%
+    recode_PT_names_to_big() %>%
+    group_by(episodedate, agegroup20, Jurisdiction) %>%
+    dplyr::tally() %>%
+    dplyr::filter(!is.na(episodedate)) %>%
+    dplyr::bind_rows(qry_canada) %>%
+    filter(Jurisdiction %in% c("Canada", recode_PT_names_to_big(PHACTrendR::PTs_big6))) %>%
+    factor_PT_west_to_east(Canada_first=TRUE, size="big") %>%
     dplyr::rename(cases = n)
 
   qry_lab_onset <- qry_cases_raw %>%
-    clean_names() %>%
+    janitor::clean_names() %>%
     filter(pt != "Repatriate") %>%
     filter(onsetdate >= "2020-03-01") %>%
     filter(onsetdate <= (max(onsetdate - days(15)))) %>%

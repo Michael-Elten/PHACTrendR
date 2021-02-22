@@ -4,7 +4,7 @@
 \alias{recode_PT_names_to_big}
 \title{recode_PT_names_to_big}
 \usage{
-recode_PT_names_to_big(dataset, geo_variable = "jurisdiction")
+recode_PT_names_to_big(dataset, geo_variable = "Jurisdiction")
 }
 \arguments{
 \item{geo_variable}{}

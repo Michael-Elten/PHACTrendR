@@ -16,9 +16,9 @@
 correct_df<-function(data,metric="",Jurisdiction="",correction_date="",corrected_value=""){
   correction_date=as.Date(correction_date)
   if (metric=="cases"){
-    data[data$prname==Jurisdiction & data$date==correction_date, "numtoday"]<-corrected_value
+    data[data$Jurisdiction==Jurisdiction & data$date==correction_date, "numtoday"]<-corrected_value
   }else if (metric=="deaths"){
-    data[data$prname==Jurisdiction & data$date==correction_date, "numdeathstoday"]<-corrected_value
+    data[data$Jurisdiction==Jurisdiction & data$date==correction_date, "numdeathstoday"]<-corrected_value
   }
   return(data)
 }

@@ -82,17 +82,9 @@ format_casedeath_table<-function(input_table){
       part = "header") %>%
 
     footnote(., value = as_paragraph(
-      c("Source: Provincial and territorial website data. ")
-    ),
+      paste0("Source: Provincial and territorial website data. ","Updated daily (Sun-Thurs). Data as of: ",max(Case_Death_Stats$Date))),
     ref_symbols = c(""),
-    part = "header") %>%
-
-    footnote(., value = as_paragraph(
-      paste0("Updated daily (Sun-Thurs). Data as of: ",max(Case_Death_Stats$Date))),
-      ref_symbols = c(""),
-      part = "header")
-
-
+    part = "header")
 
   return(ft_1)
 }
@@ -215,7 +207,7 @@ format_labtesting_table<-function(input_table){
   ft <- color(ft, j = "Weekly Change in Percent Positivity", i = ~ str_detect(`Weekly Change in Percent Positivity`, "\\-"), color="green4")
 
   ft_1 <- footnote(ft, value = as_paragraph(
-    paste0("Note: Lab testing numbers may vary slightly as PTs continually update lab testing data. Updated Mondays. Data as of: ", format(max(SALT4$Date), "%B %d"))),
+    paste0("Note: Lab testing numbers may vary slightly day to day as PTs continually update lab testing data. Updated Mondays. Data as of: ", format(max(SALT4$Date), "%B %d"))),
     ref_symbols = c(""),
     part = "header")
 

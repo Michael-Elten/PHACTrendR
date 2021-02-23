@@ -322,41 +322,8 @@ qry_cases_raw <- metabaser::metabase_query(handle, "select phacid, phacreportedd
 rename(age=age_years)
 }
 
-  qry_canada <- qry_cases_raw %>%
-    janitor::clean_names() %>%
-    select(phacid, pt, earliestdate, age, agegroup10, agegroup20) %>%
-    filter(!is.na(age)) %>%
-    group_by(earliestdate, agegroup20) %>%
-    tally() %>%
-    mutate(Jurisdiction = "Canada") %>%
-    filter(!is.na(earliestdate))
 
-  qry_cases <- qry_cases_raw %>%
-    janitor::clean_names() %>%
-    select(phacid, pt, earliestdate, age, agegroup10, agegroup20) %>%
-    mutate(Jurisdiction = toupper(pt)) %>%
-    recode_PT_names_to_big() %>%
-    group_by(earliestdate, agegroup20, Jurisdiction) %>%
-    dplyr::tally() %>%
-    dplyr::filter(!is.na(earliestdate)) %>%
-    dplyr::bind_rows(qry_canada) %>%
-    filter(Jurisdiction %in% c("Canada", recode_PT_names_to_big(PHACTrendR::PTs_big6))) %>%
-    factor_PT_west_to_east(Canada_first=TRUE, size="big") %>%
-    dplyr::rename(cases = n)
-
-  qry_lab_onset <- qry_cases_raw %>%
-    janitor::clean_names() %>%
-    filter(pt != "Repatriate") %>%
-    filter(onsetdate >= "2020-03-01") %>%
-    filter(onsetdate <= (max(onsetdate - days(15)))) %>%
-    select(onsetdate, earliestlabcollectiondate) %>%
-    filter(!is.na(onsetdate)) %>%
-    mutate(delay = earliestlabcollectiondate - onsetdate) %>%
-    filter(between(delay, 0, 15)) %>% # filtering any outliers as identified in the SAS file
-    group_by(onsetdate) %>%
-    dplyr::summarise(mean_delay = mean(delay, na.rm = TRUE),
-                     daily_case = n())
-  return(list(qry_cases_raw,qry_cases,qry_lab_onset))
+  return(qry_cases_raw)
 }
 
 

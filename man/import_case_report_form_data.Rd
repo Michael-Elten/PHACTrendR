@@ -15,3 +15,8 @@ import_case_report_form_data(method = "extract")
 \description{
 Import case report form data
 }
+\examples{
+
+qry_cases_raw<-import_case_report_form_data()
+
+}

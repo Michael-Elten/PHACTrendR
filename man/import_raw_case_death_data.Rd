@@ -12,3 +12,7 @@ import_raw_case_death_data()
 \description{
 Import raw web-scraped case and death numbers, and apply hardcode corrections
 }
+\examples{
+df_raw<-import_raw_case_death_data
+
+}

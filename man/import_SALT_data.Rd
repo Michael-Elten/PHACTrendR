@@ -12,3 +12,7 @@ import_SALT_data()
 \description{
 Import lab testing data from SALT
 }
+\examples{
+salt_raw<-import_SALT_data()
+
+}

@@ -1,6 +1,3 @@
-#import data functions
-
-
 #' Import raw web-scraped case and death numbers, and apply hardcode corrections
 #'
 #'
@@ -10,6 +7,8 @@
 #' @export
 #'
 #' @examples
+#' df_raw<-import_raw_case_death_data
+#'
 import_raw_case_death_data<-function(){
   df_raw <- readr::read_csv("https://health-infobase.canada.ca/src/data/covidLive/covid19.csv") %>%
     dplyr::mutate(date = as.Date(date, format = "%d-%m-%Y")) %>%
@@ -21,7 +20,11 @@ import_raw_case_death_data<-function(){
 
 #' Import corrected web-scraped case and death numbers, and apply hardcode corrections
 #'
-#' Corrections for data dumps, etc. Note - don't use cumulative totals from this, as they are missing some cases that could not be assigned specific dates.
+#' This function returns web-scraped case and death data with additional corrections for data dumps, etc.
+#'
+#' Note - cumulative totals will not line up with other sources as there are instances where PTs reported
+#' cases and deaths without specifying a date. These data dumps get removed in this function, but we are not able to
+#' reassign them accurately.
 #'
 #'
 #'
@@ -29,6 +32,10 @@ import_raw_case_death_data<-function(){
 #' @export
 #'
 #' @examples
+#'
+#' df<-import_adjusted_case_death_data()
+#'
+#'
 import_adjusted_case_death_data<-function(){
 df_raw <- readr::read_csv("https://health-infobase.canada.ca/src/data/covidLive/covid19.csv") %>%
   dplyr::mutate(date = as.Date(date, format = "%d-%m-%Y")) %>%
@@ -119,6 +126,10 @@ df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Mani
 df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Manitoba",correction_date = "2021-02-16",corrected_value = 2)
 df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Saskatchewan",correction_date = "2021-02-15",corrected_value = 1.5)
 df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Saskatchewan",correction_date = "2021-02-16",corrected_value = 1.5)
+#Feb20-22 death corrections - BC: 0 deaths reported Feb 20, 21 and then 8 deaths reported Feb 22
+df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "British Columbia",correction_date = "2021-02-20",corrected_value = 2.66)
+df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "British Columbia",correction_date = "2021-02-21",corrected_value = 2.66)
+df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "British Columbia",correction_date = "2021-02-21",corrected_value = 2.68)
 
 #getting corrected values for the national number now
 can_corrected_case_death<-df_corrected %>%
@@ -150,6 +161,9 @@ return(df_corrected2)
 #' @export
 #'
 #' @examples
+#'
+#' df_int<-import_international_data()
+#'
 import_international_data<-function(){
 df_int <- readr::read_csv('https://covid.ourworldindata.org/data/owid-covid-data.csv') %>%
   dplyr::mutate(date = as.Date(date, format = "%Y-%m-%d"))
@@ -158,7 +172,7 @@ return(df_int)
 
 
 
-#' get demographic data
+#' Get demographic data
 #'
 #' @return
 #'
@@ -169,6 +183,12 @@ return(df_int)
 #' @export
 #'
 #' @examples
+#'
+#' demographic_data<-import_demographic_data()
+#'
+#' latest_can_pop<-demographic_data[[1]]
+#' pt_pop20<-demographic_data[[2]]
+#'
 import_demographic_data<-function(){
 pt_pop_raw <- cansim::get_cansim("17-10-0005-01")
 
@@ -226,6 +246,10 @@ return(list(latest_can_pop,pt_pop20))
 #' @export
 #'
 #' @examples
+#'
+#' all_hosp_data<-import_hosp_data()
+#'
+#'
 import_hosp_data<-function(){
 googlesheets4::gs4_deauth()
 hosp_data_raw<-googlesheets4::read_sheet("https://docs.google.com/spreadsheets/d/17KL40qJ8tpFalFeBv1XDopTXaFm7z3Q9J2dtqqsQaJg/edit?usp=sharing", sheet="hosp_and_icu") %>%
@@ -298,6 +322,9 @@ return(all_hosp_data)
 #' @export
 #'
 #' @examples
+#'
+#' qry_cases_raw<-import_case_report_form_data()
+#'
 import_case_report_form_data<-function(method="extract"){
 
 if (method=="extract"){
@@ -333,6 +360,8 @@ rename(age=age_years)
 #' @export
 #'
 #' @examples
+#' salt_raw<-import_SALT_data()
+#'
 import_SALT_data<-function(){
 salt_raw <- read.csv("Y:/PHAC/IDPCB/CIRID/VIPS-SAR/EMERGENCY PREPAREDNESS AND RESPONSE HC4/EMERGENCY EVENT/WUHAN UNKNOWN PNEU - 2020/EPI SUMMARY/Trend analysis/_Current/_Source Data/SALT/Submitted+Reports.csv")
 return(salt_raw)

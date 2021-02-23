@@ -10,5 +10,16 @@ import_adjusted_case_death_data()
 
 }
 \description{
-Corrections for data dumps, etc. Note - don't use cumulative totals from this, as they are missing some cases that could not be assigned specific dates.
+This function returns web-scraped case and death data with additional corrections for data dumps, etc.
+}
+\details{
+Note - cumulative totals will not line up with other sources as there are instances where PTs reported
+cases and deaths without specifying a date. These data dumps get removed in this function, but we are not able to
+reassign them accurately.
+}
+\examples{
+
+df<-import_adjusted_case_death_data()
+
+
 }

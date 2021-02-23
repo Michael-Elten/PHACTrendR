@@ -12,3 +12,8 @@ import_international_data()
 \description{
 Import international data
 }
+\examples{
+
+df_int<-import_international_data()
+
+}

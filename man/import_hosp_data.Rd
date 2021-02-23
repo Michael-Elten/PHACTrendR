@@ -12,3 +12,9 @@ import_hosp_data()
 \description{
 This function imports web-scraped data on hospitalization of Covid-19 patients in Canada. There is a correction done for AB.
 }
+\examples{
+
+all_hosp_data<-import_hosp_data()
+
+
+}

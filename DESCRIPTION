@@ -2,9 +2,10 @@ Package: PHACTrendR
 Type: Package
 Title: Family of functions used in the trend report
 Version: 0.1.0
-Author: Michael Elten
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: This package is used to host functions used in the trend report, and generalized for use in other automation projects
+Authors@R: person("Michael", "Elten", email = "michael.elten@canada.ca",
+                  role = c("aut", "cre"))
+Maintainer: The package maintainer <michael.elten@canada.ca>
+Description: This package is used to host functions used in the trend report, and ready for use in other automation projects
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

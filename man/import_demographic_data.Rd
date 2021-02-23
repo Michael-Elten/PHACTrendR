@@ -2,13 +2,23 @@
 % Please edit documentation in R/import_data_functions.R
 \name{import_demographic_data}
 \alias{import_demographic_data}
-\title{get demographic data}
+\title{Get demographic data}
 \usage{
 import_demographic_data()
 }
 \value{
-list with 2 values. First value: latest_can_pop. Second value: pt_pop_20
+list with 2 values. First value: latest_can_pop. Second value: pt_pop_20.
+
+Note - this function is optional, these two datasets are also stored as R data in this package
 }
 \description{
-get demographic data
+Get demographic data
+}
+\examples{
+
+demographic_data<-import_demographic_data()
+
+latest_can_pop<-demographic_data[[1]]
+pt_pop20<-demographic_data[[2]]
+
 }

@@ -11,7 +11,7 @@
 generate_trend_report<-function(report_date=""){
 
   if (report_date==""){
-    report_date<-format(Sys.Date(), "%d%b%Y")
+    report_date<-format(Sys.Date(), "%Y-%m-%d")
   }
   library("rmarkdown")
   setwd("C:/rmd/")

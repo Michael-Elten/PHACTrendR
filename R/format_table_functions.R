@@ -7,22 +7,15 @@
 #'
 #' @examples
 format_casedeath_table<-function(input_table){
-
   input_table<-input_table %>%
-    mutate(Weekly_Change_Cases=percent(Weekly_Change_Cases,accuracy=0.1),
-           National_Case_Proportion=percent(National_Case_Proportion,accuracy=0.1),
-           Weekly_Change_Deaths=percent(Weekly_Change_Deaths,accuracy=0.1),
+    mutate(National_Case_Proportion=percent(National_Case_Proportion,accuracy=0.1),
            National_Death_Proportion=percent(National_Death_Proportion,accuracy=0.1),
            Deaths_Daily_7MA=round(Deaths_Daily_7MA,1),
            Cases_Daily_7MA=ifelse(Cases_Daily_7MA<1, number(Cases_Daily_7MA, accuracy = 0.1), number(Cases_Daily_7MA, big.mark = ",")),
            Cases_7MA_per100k=round(Cases_7MA_per100k,digits = 1),
-           Deaths_7MA_per100k=round(Deaths_7MA_per100k, digits = 2),
-           Weekly_Change_Cases=case_when(Weekly_Change_Cases>0 ~ paste0("+",Weekly_Change_Cases),
-                                         is.na(Weekly_Change_Cases) ~ "NA",
-                                         TRUE ~ as.character(Weekly_Change_Cases)),
-           Weekly_Change_Deaths=case_when(Weekly_Change_Deaths>0 ~ paste0("+",Weekly_Change_Deaths),
-                                          is.na(Weekly_Change_Deaths) ~ "NA",
-                                          TRUE ~ as.character(Weekly_Change_Deaths)))
+           Deaths_7MA_per100k=round(Deaths_7MA_per100k, digits = 2)) %>%
+    PHACTrendR::turn_num_to_percent_change(numeric_variable="Weekly_Change_Cases") %>%
+    PHACTrendR::turn_num_to_percent_change(numeric_variable="Weekly_Change_Deaths")
 
   ft <- flextable(input_table)
   ft <- color(ft, j = "Weekly_Change_Cases", i = ~ str_detect(Weekly_Change_Cases, "\\+"), color="red")
@@ -99,13 +92,9 @@ format_casedeath_table<-function(input_table){
 #' @examples
 format_hospicu_table<-function(input_table){
   input_table<-input_table %>%
-    mutate(Date=format(Date, "%B %d"),
-           delta7h=case_when(delta7h>0 ~ paste0("+",delta7h),
-                             is.na(delta7h) ~ "NA",
-                             TRUE ~ as.character(delta7h)),
-           delta7i=case_when(delta7i>0 ~ paste0("+",delta7i),
-                             is.na(delta7i) ~ "NA",
-                             TRUE ~ as.character(delta7i)))
+    mutate(Date=format(Date, "%B %d"))%>%
+    PHACTrendR::turn_num_to_percent_change(numeric_variable = "delta7h") %>%
+    PHACTrendR::turn_num_to_percent_change(numeric_variable = "delta7i")
 
 
   ft <- flextable(input_table)
@@ -164,14 +153,9 @@ format_labtesting_table<-function(input_table){
 
   input_table <- input_table %>%
     mutate(across(contains("Average"),number, big.mark=","),
-           across(contains("Percent"),label_percent(accuracy = 0.1)),
-           across(contains("change"),label_percent(accuracy = 0.1)),
-           change_in_tests=case_when(change_in_tests>0 ~ paste0("+",change_in_tests),
-                                     is.na(change_in_tests) ~ "NA",
-                                     TRUE ~ as.character(change_in_tests)),
-           change_in_positivity=case_when(change_in_positivity>0 ~ paste0("+",change_in_positivity),
-                                          is.na(change_in_positivity) ~ "NA",
-                                          TRUE ~ as.character(change_in_positivity))) %>%
+           across(contains("Percent"),label_percent(accuracy = 0.1)))%>%
+    PHACTrendR::turn_num_to_percent_change(numeric_variable = "change_in_tests")%>%
+    PHACTrendR::turn_num_to_percent_change(numeric_variable = "change_in_positivity")%>%
     rename(`Weekly Change in Tests` = change_in_tests,
            `Weekly Change in Percent Positivity` = change_in_positivity)
 

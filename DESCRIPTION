@@ -25,6 +25,7 @@ Imports:
     googlesheets4,
     rvest,
     magrittr,
-    janitor
+    janitor,
+    scales
 Depends: 
     R (>= 2.10)

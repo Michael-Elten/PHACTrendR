@@ -45,7 +45,7 @@ generate_Nemer_report<-function(report_date=""){
   #eventually, can submit report_date as a param function
 
   rmarkdown::render('Trend_Report.rmd',
-                    output_file = paste0('TrendReport_', report_date,'.pptx'),
+                    output_file = paste0('ChiefScienceReport_', report_date,'.pptx'),
                     params = input_params,
                     envir = parent.frame())
 

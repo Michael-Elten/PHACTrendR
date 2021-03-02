@@ -130,6 +130,11 @@ df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Sask
 df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "British Columbia",correction_date = "2021-02-20",corrected_value = 2.66)
 df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "British Columbia",correction_date = "2021-02-21",corrected_value = 2.66)
 df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "British Columbia",correction_date = "2021-02-22",corrected_value = 2.68)
+#Feb27-Mar1 death corrections - BC: 0 deaths reported Feb 27, 28 and then 8 deaths reported Mar 1
+df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "British Columbia",correction_date = "2021-02-27",corrected_value = 2.66)
+df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "British Columbia",correction_date = "2021-02-28",corrected_value = 2.66)
+df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "British Columbia",correction_date = "2021-03-01",corrected_value = 2.68)
+
 
 #getting corrected values for the national number now
 can_corrected_case_death<-df_corrected %>%

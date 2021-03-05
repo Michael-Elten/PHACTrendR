@@ -14,7 +14,6 @@ generate_trend_report<-function(report_date=""){
     report_date<-format(Sys.Date(), "%Y-%m-%d")
   }
   library("rmarkdown")
-  setwd("C:/rmd/")
 
   rmarkdown::render('Trend_Report.rmd',
                     output_file = paste0('DailyTrendReport_', report_date,'.pptx'),
@@ -38,7 +37,6 @@ generate_Nemer_report<-function(report_date=""){
     report_date<-format(Sys.Date(), "%d%b%Y")
   }
   library("rmarkdown")
-  setwd("C:/rmd/")
   #eventually, can write to: Y:/PHAC/IDPCB/CIRID/VIPS-SAR/EMERGENCY PREPAREDNESS AND RESPONSE HC4/EMERGENCY EVENT/WUHAN UNKNOWN PNEU - 2020/EPI SUMMARY/Nemer Report
 
   input_params<-list(report="Nemer")

@@ -7,11 +7,51 @@
 #' @export
 #'
 #' @examples
-#' df_raw<-import_raw_case_death_data
+#' df_raw<-import_raw_case_death_data()
 #'
 import_raw_case_death_data<-function(){
-  df_raw <- readr::read_csv("https://health-infobase.canada.ca/src/data/covidLive/covid19.csv") %>%
-    dplyr::mutate(date = as.Date(date, format = "%d-%m-%Y")) %>%
+  df_raw <- readr::read_csv("https://health-infobase.canada.ca/src/data/covidLive/covid19.csv",
+                            col_types=cols(
+                              pruid=col_double(),
+                              prname=col_character(),
+                              prnameFR=col_character(),
+                              date=col_date(format="%d-%m-%Y"),
+                              update=col_logical(),
+                              numconf=col_double(),
+                              numprob=col_double(),
+                              numdeaths=col_double(),
+                              numtotal=col_double(),
+                              numtested=col_double(),
+                              numtests=col_double(),
+                              numrecover=col_double(),
+                              percentrecover=col_double(),
+                              ratetested=col_double(),
+                              ratetests=col_double(),
+                              numtoday=col_double(),
+                              percentoday=col_double(),
+                              ratetotal=col_double(),
+                              ratedeaths=col_double(),
+                              numdeathstoday=col_double(),
+                              percentdeath=col_double(),
+                              numtestedtoday=col_double(),
+                              numteststoday=col_double(),
+                              numrecoveredtoday=col_double(),
+                              percentactive=col_double(),
+                              numactive=col_double(),
+                              rateactive=col_double(),
+                              numtotal_last14=col_double(),
+                              ratetotal_last14=col_double(),
+                              numdeaths_last14=col_double(),
+                              ratedeaths_last14=col_double(),
+                              numtotal_last7=col_double(),
+                              ratetotal_last7=col_double(),
+                              numdeaths_last7=col_double(),
+                              ratedeaths_last7=col_double(),
+                              avgtotal_last7=col_double(),
+                              avgincidence_last7=col_double(),
+                              avgdeaths_last7=col_double(),
+                              avgratedeaths_last7=col_double()
+                            )) %>%
     rename(Jurisdiction=prname,
            Jurisdiction_FR=prnameFR)
   return(df_raw)
@@ -37,10 +77,50 @@ import_raw_case_death_data<-function(){
 #'
 #'
 import_adjusted_case_death_data<-function(){
-df_raw <- readr::read_csv("https://health-infobase.canada.ca/src/data/covidLive/covid19.csv") %>%
-  dplyr::mutate(date = as.Date(date, format = "%d-%m-%Y")) %>%
-  rename(Jurisdiction=prname,
-         Jurisdiction_FR=prnameFR)
+  df_raw <- readr::read_csv("https://health-infobase.canada.ca/src/data/covidLive/covid19.csv",
+                            col_types=cols(
+                              pruid=col_double(),
+                              prname=col_character(),
+                              prnameFR=col_character(),
+                              date=col_date(format="%d-%m-%Y"),
+                              update=col_logical(),
+                              numconf=col_double(),
+                              numprob=col_double(),
+                              numdeaths=col_double(),
+                              numtotal=col_double(),
+                              numtested=col_double(),
+                              numtests=col_double(),
+                              numrecover=col_double(),
+                              percentrecover=col_double(),
+                              ratetested=col_double(),
+                              ratetests=col_double(),
+                              numtoday=col_double(),
+                              percentoday=col_double(),
+                              ratetotal=col_double(),
+                              ratedeaths=col_double(),
+                              numdeathstoday=col_double(),
+                              percentdeath=col_double(),
+                              numtestedtoday=col_double(),
+                              numteststoday=col_double(),
+                              numrecoveredtoday=col_double(),
+                              percentactive=col_double(),
+                              numactive=col_double(),
+                              rateactive=col_double(),
+                              numtotal_last14=col_double(),
+                              ratetotal_last14=col_double(),
+                              numdeaths_last14=col_double(),
+                              ratedeaths_last14=col_double(),
+                              numtotal_last7=col_double(),
+                              ratetotal_last7=col_double(),
+                              numdeaths_last7=col_double(),
+                              ratedeaths_last7=col_double(),
+                              avgtotal_last7=col_double(),
+                              avgincidence_last7=col_double(),
+                              avgdeaths_last7=col_double(),
+                              avgratedeaths_last7=col_double()
+                            )) %>%
+    rename(Jurisdiction=prname,
+           Jurisdiction_FR=prnameFR)
 
 
 #Removing trailing unreported days from PTs, in the past 7 days.

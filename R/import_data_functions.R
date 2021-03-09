@@ -1,4 +1,7 @@
-#' Import raw web-scraped case and death numbers, and apply hardcode corrections
+#' Import raw web-scraped case and death numbers from Infobase
+#'
+#' This function downloads the covid19.csv dataset hosted at: https://health-infobase.canada.ca/src/data/covidLive/covid19.csv.
+#' This dataset is maintained by the daily report epidemiologist from the Operations group at SED (former HPOC). Questions on contents of this dataset can be sent to hsfluepi generic account.
 #'
 #'
 #'
@@ -8,6 +11,12 @@
 #'
 #' @examples
 #' df_raw<-import_raw_case_death_data()
+#'
+#' @family import functions
+#'
+#' @seealso
+#'
+#' \code{\link{import_adjusted_case_death_data}}
 #'
 import_raw_case_death_data<-function(){
   df_raw <- readr::read_csv("https://health-infobase.canada.ca/src/data/covidLive/covid19.csv",
@@ -58,12 +67,12 @@ import_raw_case_death_data<-function(){
 }
 
 
-#' Import corrected web-scraped case and death numbers, and apply hardcode corrections
+#' Import corrected web-scraped case and death numbers from Infobase
 #'
-#' This function returns web-scraped case and death data with additional corrections for data dumps, etc.
+#' This function downloads the covid19.csv dataset hosted at: https://health-infobase.canada.ca/src/data/covidLive/covid19.csv, but also makes additional corrections for data dumps, etc.
 #'
-#' Note - cumulative totals will not line up with other sources as there are instances where PTs reported
-#' cases and deaths without specifying a date. These data dumps get removed in this function, but we are not able to
+#' Important note - cumulative totals will not line up with other sources as there are instances where PTs reported
+#' cases and deaths without specifying a date. These additional cases get removed in this function, but we are not able to
 #' reassign them accurately.
 #'
 #'
@@ -75,6 +84,11 @@ import_raw_case_death_data<-function(){
 #'
 #' df<-import_adjusted_case_death_data()
 #'
+#'#' @family import functions
+#'
+#'#' @seealso
+#'
+#' \code{\link{import_raw_case_death_data}}
 #'
 import_adjusted_case_death_data<-function(){
   df_raw <- readr::read_csv("https://health-infobase.canada.ca/src/data/covidLive/covid19.csv",
@@ -249,8 +263,16 @@ return(df_corrected2)
 #'
 #' df_int<-import_international_data()
 #'
+#' #' @family import functions
+#'
 import_international_data<-function(){
-df_int <- readr::read_csv('https://covid.ourworldindata.org/data/owid-covid-data.csv') %>%
+df_int <- readr::read_csv('https://covid.ourworldindata.org/data/owid-covid-data.csv',
+                          col_types = cols(
+                            iso_code=col_character(),
+                            continent=col_character(),
+                            location=col_character(),
+                            date=col_date(format = "%Y-%m-%d")
+                          )) %>%
   dplyr::mutate(date = as.Date(date, format = "%Y-%m-%d"))
 return(df_int)
 }
@@ -263,7 +285,8 @@ return(df_int)
 #'
 #' list with 2 values. First value: latest_can_pop. Second value: pt_pop_20.
 #'
-#' Note - this function is optional, these two datasets are also stored as R data in this package
+#' Note - this function is optional, and is not currently recommended to use. These two datasets are also stored as R data in this package.
+#' To access them, simply call: PHACTrendR::latest_can_pop, and PHACTrendR::pt_pop_20
 #'
 #' @export
 #'
@@ -273,6 +296,8 @@ return(df_int)
 #'
 #' latest_can_pop<-demographic_data[[1]]
 #' pt_pop20<-demographic_data[[2]]
+#'
+#'#' @family import functions
 #'
 import_demographic_data<-function(){
 pt_pop_raw <- cansim::get_cansim("17-10-0005-01")
@@ -320,9 +345,6 @@ pt_pop20 <- pt_pop_raw %>%
 return(list(latest_can_pop,pt_pop20))
 }
 
-
-
-
 #' Import web scraped hospital and ICU data
 #'
 #' This function imports web-scraped data on hospitalization of Covid-19 patients in Canada. There is a correction done for AB.
@@ -336,11 +358,90 @@ return(list(latest_can_pop,pt_pop20))
 #'
 #'
 import_hosp_data<-function(){
+  googlesheets4::gs4_deauth()
+  hosp_data_raw<-googlesheets4::read_sheet("https://docs.google.com/spreadsheets/d/17KL40qJ8tpFalFeBv1XDopTXaFm7z3Q9J2dtqqsQaJg/edit?usp=sharing", sheet="hosp_and_icu") %>%
+    dplyr::filter(!Jurisdiction=="AB") %>%
+    dplyr::mutate(hosp=parse_number(as.character(hosp)),
+                  icu=parse_number(as.character(icu)))
+
+  # First scraped data for Alberta
+  AB_severity <- xml2::read_html("https://www.alberta.ca/stats/covid-19-alberta-statistics.htm") %>%
+    html_nodes(xpath = "//*[@id='summary']/div/script/text()") %>%
+    .[1] %>%
+    html_text()
+
+  #extracts dates
+  AB_dates <- AB_severity %>%
+    str_extract_all("\\d{4}-\\d{2}-\\d{2}") %>%
+    unlist() %>%
+    as.Date() %>%
+    unique()
+
+  AB_counts <- AB_severity %>%
+    str_extract_all("((?:\\d+,)+\\d+)") %>%
+    unlist()
+
+  AB_non_icu <- AB_counts[15] %>%
+    strsplit(split = ",") %>%
+    unlist() %>%
+    as.numeric()
+
+  AB_icu <- AB_counts[7] %>%
+    strsplit(split = ",") %>%
+    unlist() %>%
+    as.numeric()
+
+  AB_all <- tibble(Date = AB_dates, hosp = AB_non_icu + AB_icu, icu=AB_icu) %>%
+    mutate(Jurisdiction = "AB")
+
+  combined_hosp_data<-bind_rows(hosp_data_raw,AB_all) %>%
+    arrange(Date) %>%
+    filter(Date>"2020-03-31") %>%
+    group_by(Date)
+
+  Canada_hosp_data<-combined_hosp_data %>%
+    group_by(Date) %>%
+    summarise(hosp=sum(hosp, na.rm = TRUE),
+              icu=sum(icu, na.rm = TRUE)) %>%
+    mutate(Jurisdiction="CAN")
+
+  all_hosp_data<-bind_rows(combined_hosp_data,Canada_hosp_data) %>%
+    arrange(Date) %>%
+    rename(hospitalized=hosp)%>%
+    recode_PT_names_to_big() %>%
+    factor_PT_west_to_east(size="big") %>%
+    pivot_longer("hospitalized":"icu", names_to = "type", values_to = "cases") %>%
+    mutate(Date=as.Date(Date))
+  #
+  # pt_hosp_icu<-all_hosp_data %>%
+  #   filter(!Jurisdiction=="Repatriated travellers")
+
+  return(all_hosp_data)
+}
+
+
+#' Work in Progress!! Import web scraped hospital and ICU data
+#'
+#' This function imports web-scraped data on hospitalization of Covid-19 patients in Canada. There is a retrospective correction done for AB.
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#'
+#' all_hosp_data<-import_hosp_data()
+#'
+#' #' @family import functions
+#'
+import_hosp_data2<-function(correct_AB=TRUE){
 googlesheets4::gs4_deauth()
 hosp_data_raw<-googlesheets4::read_sheet("https://docs.google.com/spreadsheets/d/17KL40qJ8tpFalFeBv1XDopTXaFm7z3Q9J2dtqqsQaJg/edit?usp=sharing", sheet="hosp_and_icu") %>%
-  dplyr::filter(!Jurisdiction=="AB") %>%
   dplyr::mutate(hosp=parse_number(as.character(hosp)),
          icu=parse_number(as.character(icu)))
+
+if (correct_AB==TRUE){
+  hosp_data_no_AB<-hosp_data_raw %>%
+    filter(!Jurisdiction=="Alberta")
 
 # First scraped data for Alberta
 AB_severity <- xml2::read_html("https://www.alberta.ca/stats/covid-19-alberta-statistics.htm") %>%
@@ -372,30 +473,39 @@ AB_icu <- AB_counts[7] %>%
 AB_all <- tibble(Date = AB_dates, hosp = AB_non_icu + AB_icu, icu=AB_icu) %>%
   mutate(Jurisdiction = "AB")
 
-combined_hosp_data<-bind_rows(hosp_data_raw,AB_all) %>%
+final_hosp_data<-bind_rows(hosp_data_no_AB,AB_all) %>%
   arrange(Date) %>%
   filter(Date>"2020-03-31") %>%
   group_by(Date)
+}
+else if (correct_AB==FALSE){
+  final_hosp_data<-hosp_data_raw %>%
+    arrange(Date) %>%
+    filter(Date>"2020-03-31") %>%
+    group_by(Date)
+} else{
+  print("invalid input was received for correct_AB term, please enter either TRUE or FALSE (and not as a quoted string)")
+  stop()
+}
 
-Canada_hosp_data<-combined_hosp_data %>%
+Canada_hosp_data<-final_hosp_data %>%
   group_by(Date) %>%
   summarise(hosp=sum(hosp, na.rm = TRUE),
-            icu=sum(icu, na.rm = TRUE)) %>%
+            icu=sum(icu, na.rm = TRUE),
+            .groups="drop_last") %>%
   mutate(Jurisdiction="CAN")
 
-all_hosp_data<-bind_rows(combined_hosp_data,Canada_hosp_data) %>%
+all_hosp_data<-bind_rows(final_hosp_data,Canada_hosp_data) %>%
   arrange(Date) %>%
   rename(hospitalized=hosp)%>%
   recode_PT_names_to_big() %>%
   factor_PT_west_to_east(size="big") %>%
   pivot_longer("hospitalized":"icu", names_to = "type", values_to = "cases") %>%
   mutate(Date=as.Date(Date))
-#
-# pt_hosp_icu<-all_hosp_data %>%
-#   filter(!Jurisdiction=="Repatriated travellers")
 
 return(all_hosp_data)
 }
+
 
 
 
@@ -409,6 +519,8 @@ return(all_hosp_data)
 #' @examples
 #'
 #' qry_cases_raw<-import_case_report_form_data()
+#'
+#' #' @family import functions
 #'
 import_case_report_form_data<-function(method="extract"){
 
@@ -446,6 +558,8 @@ rename(age=age_years)
 #'
 #' @examples
 #' salt_raw<-import_SALT_data()
+#'
+#' #' @family import functions
 #'
 import_SALT_data<-function(){
 salt_raw <- read.csv("Y:/PHAC/IDPCB/CIRID/VIPS-SAR/EMERGENCY PREPAREDNESS AND RESPONSE HC4/EMERGENCY EVENT/WUHAN UNKNOWN PNEU - 2020/EPI SUMMARY/Trend analysis/_Current/_Source Data/SALT/Submitted+Reports.csv")

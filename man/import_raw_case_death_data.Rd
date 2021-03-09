@@ -2,7 +2,7 @@
 % Please edit documentation in R/import_data_functions.R
 \name{import_raw_case_death_data}
 \alias{import_raw_case_death_data}
-\title{Import raw web-scraped case and death numbers, and apply hardcode corrections}
+\title{Import raw web-scraped case and death numbers from Infobase}
 \usage{
 import_raw_case_death_data()
 }
@@ -10,9 +10,13 @@ import_raw_case_death_data()
 
 }
 \description{
-Import raw web-scraped case and death numbers, and apply hardcode corrections
+This function downloads the covid19.csv dataset hosted at: https://health-infobase.canada.ca/src/data/covidLive/covid19.csv.
+This dataset is maintained by the daily report epidemiologist from the Operations group at SED (former HPOC). Questions on contents of this dataset can be sent to hsfluepi generic account.
 }
 \examples{
-df_raw<-import_raw_case_death_data
+df_raw<-import_raw_case_death_data()
 
+}
+\seealso{
+\code{\link{import_adjusted_case_death_data()}}
 }

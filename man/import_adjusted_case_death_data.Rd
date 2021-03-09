@@ -2,7 +2,7 @@
 % Please edit documentation in R/import_data_functions.R
 \name{import_adjusted_case_death_data}
 \alias{import_adjusted_case_death_data}
-\title{Import corrected web-scraped case and death numbers, and apply hardcode corrections}
+\title{Import corrected web-scraped case and death numbers from Infobase}
 \usage{
 import_adjusted_case_death_data()
 }
@@ -10,11 +10,11 @@ import_adjusted_case_death_data()
 
 }
 \description{
-This function returns web-scraped case and death data with additional corrections for data dumps, etc.
+This function downloads the covid19.csv dataset hosted at: https://health-infobase.canada.ca/src/data/covidLive/covid19.csv, but also makes additional corrections for data dumps, etc.
 }
 \details{
-Note - cumulative totals will not line up with other sources as there are instances where PTs reported
-cases and deaths without specifying a date. These data dumps get removed in this function, but we are not able to
+Important note - cumulative totals will not line up with other sources as there are instances where PTs reported
+cases and deaths without specifying a date. These additional cases get removed in this function, but we are not able to
 reassign them accurately.
 }
 \examples{

@@ -161,7 +161,7 @@ format_labtesting_table<-function(input_table){
 
 
   ft <- flextable(input_table)
-  ft<-width(ft, j=1, width = 3)
+  ft<-width(ft, j=1, width = 2.75)
   ft<-width(ft, j=2:ncol(input_table), width = 1.5)
   ft <- height_all(ft, height=.26)
   ft <- fontsize(ft, size = 14, part="all")

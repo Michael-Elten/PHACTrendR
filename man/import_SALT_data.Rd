@@ -16,3 +16,13 @@ Import lab testing data from SALT
 salt_raw<-import_SALT_data()
 
 }
+\seealso{
+Other import functions: 
+\code{\link{import_DISCOVER_data}()},
+\code{\link{import_adjusted_infobase_data}()},
+\code{\link{import_demographic_data}()},
+\code{\link{import_hosp_data}()},
+\code{\link{import_international_data}()},
+\code{\link{import_raw_infobase_data}()}
+}
+\concept{import functions}

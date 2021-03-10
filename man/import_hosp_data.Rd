@@ -4,17 +4,29 @@
 \alias{import_hosp_data}
 \title{Import web scraped hospital and ICU data}
 \usage{
-import_hosp_data()
+import_hosp_data(correct_AB = TRUE)
+}
+\arguments{
+\item{correct_AB}{(optional) A boolean value (TRUE or FALSE) that indicates whether you would like to use current data from AB's website to correct AB values. TRUE by default.}
 }
 \value{
 
 }
 \description{
-This function imports web-scraped data on hospitalization of Covid-19 patients in Canada. There is a correction done for AB.
+This function imports human web-scraped data on hospitalization of Covid-19 patients in Canada. There is a retrospective correction done for AB by default.
 }
 \examples{
 
 all_hosp_data<-import_hosp_data()
 
-
 }
+\seealso{
+Other import functions: 
+\code{\link{import_DISCOVER_data}()},
+\code{\link{import_SALT_data}()},
+\code{\link{import_adjusted_infobase_data}()},
+\code{\link{import_demographic_data}()},
+\code{\link{import_international_data}()},
+\code{\link{import_raw_infobase_data}()}
+}
+\concept{import functions}

@@ -9,7 +9,8 @@ import_demographic_data()
 \value{
 list with 2 values. First value: latest_can_pop. Second value: pt_pop_20.
 
-Note - this function is optional, these two datasets are also stored as R data in this package
+Note - this function is optional, and is not currently recommended to use. These two datasets are also stored as R data in this package.
+To access them, simply call: PHACTrendR::latest_can_pop, and PHACTrendR::pt_pop_20
 }
 \description{
 Get demographic data
@@ -22,3 +23,13 @@ latest_can_pop<-demographic_data[[1]]
 pt_pop20<-demographic_data[[2]]
 
 }
+\seealso{
+Other import functions: 
+\code{\link{import_DISCOVER_data}()},
+\code{\link{import_SALT_data}()},
+\code{\link{import_adjusted_infobase_data}()},
+\code{\link{import_hosp_data}()},
+\code{\link{import_international_data}()},
+\code{\link{import_raw_infobase_data}()}
+}
+\concept{import functions}

@@ -17,3 +17,13 @@ Import international data
 df_int<-import_international_data()
 
 }
+\seealso{
+Other import functions: 
+\code{\link{import_DISCOVER_data}()},
+\code{\link{import_SALT_data}()},
+\code{\link{import_adjusted_infobase_data}()},
+\code{\link{import_demographic_data}()},
+\code{\link{import_hosp_data}()},
+\code{\link{import_raw_infobase_data}()}
+}
+\concept{import functions}

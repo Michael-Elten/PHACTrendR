@@ -27,6 +27,7 @@ qry_cases_raw<-import_DISCOVER_data()
 \seealso{
 Other import functions: 
 \code{\link{import_SALT_data}()},
+\code{\link{import_adjusted_infobase_data_backup}()},
 \code{\link{import_adjusted_infobase_data}()},
 \code{\link{import_demographic_data}()},
 \code{\link{import_hosp_data}()},

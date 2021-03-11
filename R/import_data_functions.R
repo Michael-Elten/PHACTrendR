@@ -83,7 +83,7 @@ import_raw_infobase_data<-function(){
 #' @family import functions
 #'
 #'
-import_adjusted_infobase_data<-function(){
+import_adjusted_infobase_data_backup<-function(){
   df_raw <- readr::read_csv("https://health-infobase.canada.ca/src/data/covidLive/covid19.csv",
                             col_types=cols(
                               pruid=col_double(),
@@ -144,6 +144,16 @@ df<-df_raw %>%
 df_corrected<-df %>%
   select(-numtotal,-numdeaths)
 
+
+correct_df<-function(data,metric="",Jurisdiction="",correction_date="",corrected_value=""){
+  if (metric=="cases"){
+    data[data$Jurisdiction==Jurisdiction & data$date==correction_date, "numtoday"]<-corrected_value
+  }else if (metric=="deaths"){
+    data[data$Jurisdiction==Jurisdiction & data$date==correction_date, "numdeathstoday"]<-corrected_value
+  }
+  return(data)
+}
+
 ########### Hard-coded manual corrections
 # May 3rd, extra 1317 cases from April were reported in QC, real value should be 892 (https://www.cbc.ca/news/canada/montreal/covid-19-quebec-may-3-1.5553881)
 df_corrected<-correct_df(data=df_corrected, metric="cases",Jurisdiction = "Quebec",correction_date = "2020-05-03",corrected_value = 892)
@@ -173,11 +183,12 @@ df_corrected<-correct_df(data=df_corrected, metric="cases",Jurisdiction = "Manit
 df_corrected<-correct_df(data=df_corrected, metric="cases",Jurisdiction = "Manitoba",correction_date = "2020-12-27",corrected_value = 173.67)
 df_corrected<-correct_df(data=df_corrected, metric="cases",Jurisdiction = "Manitoba",correction_date = "2021-01-01",corrected_value = 163)
 df_corrected<-correct_df(data=df_corrected, metric="cases",Jurisdiction = "Manitoba",correction_date = "2021-01-02",corrected_value = 163)
+df_corrected<-correct_df(data=df_corrected, metric="cases",Jurisdiction = "Nova Scotia",     correction_date = "2020-12-25",corrected_value = 3.25)
+df_corrected<-correct_df(data=df_corrected, metric="cases",Jurisdiction = "Nova Scotia",     correction_date = "2020-12-26",corrected_value = 3.25)
+df_corrected<-correct_df(data=df_corrected, metric="cases",Jurisdiction = "Nova Scotia",     correction_date = "2020-12-27",corrected_value = 3.25)
+df_corrected<-correct_df(data=df_corrected, metric="cases",Jurisdiction = "Nova Scotia",     correction_date = "2020-12-28",corrected_value = 3.25)
 #deaths over Xmas and NY 2020
-df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Nova Scotia",     correction_date = "2020-12-25",corrected_value = 3.25)
-df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Nova Scotia",     correction_date = "2020-12-26",corrected_value = 3.25)
-df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Nova Scotia",     correction_date = "2020-12-27",corrected_value = 3.25)
-df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Nova Scotia",     correction_date = "2020-12-28",corrected_value = 3.25)
+
 df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Ontario",         correction_date = "2020-12-25",corrected_value = 40.5)
 df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Ontario",         correction_date = "2020-12-26",corrected_value = 40.5)
 df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Manitoba",        correction_date = "2020-12-25",corrected_value = 9.33)
@@ -248,10 +259,16 @@ return(df_corrected2)
 
 #' Experimental version! Import corrected web-scraped case and death numbers from Infobase
 #'
+#' @description
+#'
 #' This function downloads the covid19.csv dataset hosted at: \url{https://health-infobase.canada.ca/src/data/covidLive/covid19.csv}, but also makes additional corrections for data dumps, etc.
+#'
+#' To add new corrections to data, update the following google sheets file: \url{https://docs.google.com/spreadsheets/d/1lHTwMuZlGq8hXpiFMamy46jRkcBqetP16-1cYkfELJE/}. Currently you must be logged in under the trend epi google account to edit.
+#'
 #' Important note - cumulative totals will not line up with other sources as there are instances where PTs reported
 #' cases and deaths without specifying a date. These additional cases get removed in this function, but we are not able to
 #' reassign them accurately.
+#'
 #'
 #'
 #'
@@ -265,7 +282,7 @@ return(df_corrected2)
 #' @family import functions
 #'
 #'
-import_adjusted_infobase_data_experimental<-function(){
+import_adjusted_infobase_data<-function(){
   df_raw <- readr::read_csv("https://health-infobase.canada.ca/src/data/covidLive/covid19.csv",
                             col_types=cols(
                               pruid=col_double(),
@@ -330,87 +347,24 @@ import_adjusted_infobase_data_experimental<-function(){
 
   googlesheets4::gs4_deauth()
   infobase_correction_info<-googlesheets4::read_sheet("https://docs.google.com/spreadsheets/d/1lHTwMuZlGq8hXpiFMamy46jRkcBqetP16-1cYkfELJE", sheet="data_table",
-                                                      col_types="ccDdc")
+                                                      col_types="ccDddcc")
 
-  #thinking to use lapply family to use correct_df function over df_corrected dataset, taking "infobase_correction" dataframe as input variables
+  correct_df<-function(data,metric="",Jurisdiction="",correction_date="",corrected_value=""){
+    if (metric=="cases"){
+      data[data$Jurisdiction==Jurisdiction & data$date==correction_date, "numtoday"]<-corrected_value
+    }else if (metric=="deaths"){
+      data[data$Jurisdiction==Jurisdiction & data$date==correction_date, "numdeathstoday"]<-corrected_value
+    }
+    return(data)
+  }
 
-  # May 3rd, extra 1317 cases from April were reported in QC, real value should be 892 (https://www.cbc.ca/news/canada/montreal/covid-19-quebec-may-3-1.5553881)
-  df_corrected<-correct_df(data=df_corrected, metric="cases",Jurisdiction = "Quebec",correction_date = "2020-05-03",corrected_value = 892)
-  # May 31st, extra 165 cases were reported in QC, real value should be 37 (https://montreal.ctvnews.ca/quebec-records-37-new-covid-19-deaths-but-adds-165-that-weren-t-recorded-1.4962370)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Quebec",correction_date = "2020-05-31",corrected_value = 37)
-
-  # #data dump of deaths in Ontario on October 2-4
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Ontario",correction_date = "2020-10-02",corrected_value = 2)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Ontario",correction_date = "2020-10-03",corrected_value = 4)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Ontario",correction_date = "2020-10-04",corrected_value = 4)
-  #Oct10-12 weekend
-  df_corrected<-correct_df(data=df_corrected, metric="cases",Jurisdiction = "British Columbia",correction_date = "2020-10-10",corrected_value = 170)
-  df_corrected<-correct_df(data=df_corrected, metric="cases",Jurisdiction = "British Columbia",correction_date = "2020-10-11",corrected_value = 159)
-  df_corrected<-correct_df(data=df_corrected, metric="cases",Jurisdiction = "British Columbia",correction_date = "2020-10-12",corrected_value = 119)
-  df_corrected<-correct_df(data=df_corrected, metric="cases",Jurisdiction = "British Columbia",correction_date = "2020-10-13",corrected_value = 101)
-  df_corrected<-correct_df(data=df_corrected, metric="cases",Jurisdiction = "Alberta",correction_date = "2020-10-10",corrected_value = 236)
-  df_corrected<-correct_df(data=df_corrected, metric="cases",Jurisdiction = "Alberta",correction_date = "2020-10-11",corrected_value = 260)
-  df_corrected<-correct_df(data=df_corrected, metric="cases",Jurisdiction = "Alberta",correction_date = "2020-10-12",corrected_value = 246)
-  df_corrected<-correct_df(data=df_corrected, metric="cases",Jurisdiction = "Alberta",correction_date = "2020-10-13",corrected_value = 220)
-  df_corrected<-correct_df(data=df_corrected, metric="cases",Jurisdiction = "Ontario",correction_date = "2020-10-12",corrected_value = 807)
-  df_corrected<-correct_df(data=df_corrected, metric="cases",Jurisdiction = "Ontario",correction_date = "2020-10-13",corrected_value = 736)
-  # cases over Xmas and NY 2020
-  df_corrected<-correct_df(data=df_corrected, metric="cases",Jurisdiction = "Quebec",correction_date = "2020-12-25",corrected_value = 2246)
-  df_corrected<-correct_df(data=df_corrected, metric="cases",Jurisdiction = "Quebec",correction_date = "2020-12-26",corrected_value = 2246)
-  df_corrected<-correct_df(data=df_corrected, metric="cases",Jurisdiction = "Manitoba",correction_date = "2020-12-25",corrected_value = 173.66)
-  df_corrected<-correct_df(data=df_corrected, metric="cases",Jurisdiction = "Manitoba",correction_date = "2020-12-26",corrected_value = 173.67)
-  df_corrected<-correct_df(data=df_corrected, metric="cases",Jurisdiction = "Manitoba",correction_date = "2020-12-27",corrected_value = 173.67)
-  df_corrected<-correct_df(data=df_corrected, metric="cases",Jurisdiction = "Manitoba",correction_date = "2021-01-01",corrected_value = 163)
-  df_corrected<-correct_df(data=df_corrected, metric="cases",Jurisdiction = "Manitoba",correction_date = "2021-01-02",corrected_value = 163)
-  #deaths over Xmas and NY 2020
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Nova Scotia",     correction_date = "2020-12-25",corrected_value = 3.25)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Nova Scotia",     correction_date = "2020-12-26",corrected_value = 3.25)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Nova Scotia",     correction_date = "2020-12-27",corrected_value = 3.25)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Nova Scotia",     correction_date = "2020-12-28",corrected_value = 3.25)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Ontario",         correction_date = "2020-12-25",corrected_value = 40.5)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Ontario",         correction_date = "2020-12-26",corrected_value = 40.5)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Manitoba",        correction_date = "2020-12-25",corrected_value = 9.33)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Manitoba",        correction_date = "2020-12-26",corrected_value = 9.33)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Manitoba",        correction_date = "2020-12-27",corrected_value = 9.34)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "British Columbia",correction_date = "2021-01-01",corrected_value = 11.25)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "British Columbia",correction_date = "2021-01-02",corrected_value = 11.25)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "British Columbia",correction_date = "2021-01-03",corrected_value = 11.25)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "British Columbia",correction_date = "2021-01-04",corrected_value = 11.25)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Alberta",         correction_date = "2020-12-31",corrected_value = 19.2)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Alberta",         correction_date = "2021-01-01",corrected_value = 19.2)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Alberta",         correction_date = "2021-01-02",corrected_value = 19.2)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Alberta",         correction_date = "2021-01-03",corrected_value = 19.2)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Alberta",         correction_date = "2021-01-04",corrected_value = 19.2)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Manitoba",        correction_date = "2021-01-01",corrected_value = 5.5)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Manitoba",        correction_date = "2021-01-02",corrected_value = 5.5)
-  #Weekend Jan23-24
-  #NOTE: We are excluding 380 cases AB reported on Jan25 as they were from "previous weeks". Not sure where to reassign them at the moment but should figure out a better solution.
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "British Columbia",correction_date = "2021-01-23",corrected_value = 8.66)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "British columbia",correction_date = "2021-01-24",corrected_value = 8.67)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "British Columbia",correction_date = "2021-01-25",corrected_value = 8.67)
-  df_corrected<-correct_df(data=df_corrected, metric="cases",Jurisdiction = "Alberta",correction_date = "2021-01-25",corrected_value = 360)
-  #Weekend Jan30-31 (21 deaths reported on Feb.1 after not reporting over the weekend)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "British Columbia",correction_date = "2021-01-30",corrected_value = 7)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "British Columbia",correction_date = "2021-01-31",corrected_value = 7)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "British Columbia",correction_date = "2021-02-01",corrected_value = 7)
-  #Weekend Feb6-7 (13 deaths reported on Feb.8 after not reporting over the weekend)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "British Columbia",correction_date = "2021-02-06",corrected_value = 4.33)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "British Columbia",correction_date = "2021-02-07",corrected_value = 4.33)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "British Columbia",correction_date = "2021-02-08",corrected_value = 4.34)
-  #Feb15+16 death corrections
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Manitoba",correction_date = "2021-02-15",corrected_value = 2)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Manitoba",correction_date = "2021-02-16",corrected_value = 2)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Saskatchewan",correction_date = "2021-02-15",corrected_value = 1.5)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "Saskatchewan",correction_date = "2021-02-16",corrected_value = 1.5)
-  #Feb20-22 death corrections - BC: 0 deaths reported Feb 20, 21 and then 8 deaths reported Feb 22
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "British Columbia",correction_date = "2021-02-20",corrected_value = 2.66)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "British Columbia",correction_date = "2021-02-21",corrected_value = 2.66)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "British Columbia",correction_date = "2021-02-22",corrected_value = 2.68)
-  #Feb27-Mar1 death corrections - BC: 0 deaths reported Feb 27, 28 and then 8 deaths reported Mar 1
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "British Columbia",correction_date = "2021-02-27",corrected_value = 2.66)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "British Columbia",correction_date = "2021-02-28",corrected_value = 2.66)
-  df_corrected<-correct_df(data=df_corrected, metric="deaths",Jurisdiction = "British Columbia",correction_date = "2021-03-01",corrected_value = 2.68)
-
+  for (i in 1:nrow(infobase_correction_info)){
+    df_corrected<-correct_df(data=df_corrected,
+                             metric=infobase_correction_info[[i,"metric"]],
+                             Jurisdiction=infobase_correction_info[[i,"Jurisdiction"]],
+                             correction_date=infobase_correction_info[[i,"correction_date"]],
+                             corrected_value=infobase_correction_info[[i,"corrected_value"]])
+  }
 
   #getting corrected values for the national number now
   df_can_corrected<-df_corrected %>%

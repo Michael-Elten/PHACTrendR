@@ -19,6 +19,7 @@ salt_raw<-import_SALT_data()
 \seealso{
 Other import functions: 
 \code{\link{import_DISCOVER_data}()},
+\code{\link{import_adjusted_infobase_data_backup}()},
 \code{\link{import_adjusted_infobase_data}()},
 \code{\link{import_demographic_data}()},
 \code{\link{import_hosp_data}()},

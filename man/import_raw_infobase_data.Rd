@@ -10,7 +10,7 @@ import_raw_infobase_data()
 
 }
 \description{
-This function downloads the covid19.csv dataset hosted at: https://health-infobase.canada.ca/src/data/covidLive/covid19.csv.
+This function downloads the covid19.csv dataset hosted at: \url{https://health-infobase.canada.ca/src/data/covidLive/covid19.csv}.
 This dataset is maintained by the daily report epidemiologist from the Operations group at SED (former HPOC). Questions on contents of this dataset can be sent to hsfluepi generic account.
 }
 \examples{
@@ -18,11 +18,10 @@ df_raw<-import_raw_infobase_data()
 
 }
 \seealso{
-\code{\link{import_adjusted_infobase_data}}
-
 Other import functions: 
 \code{\link{import_DISCOVER_data}()},
 \code{\link{import_SALT_data}()},
+\code{\link{import_adjusted_infobase_data_backup}()},
 \code{\link{import_adjusted_infobase_data}()},
 \code{\link{import_demographic_data}()},
 \code{\link{import_hosp_data}()},

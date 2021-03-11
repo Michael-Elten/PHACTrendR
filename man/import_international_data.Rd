@@ -21,6 +21,7 @@ df_int<-import_international_data()
 Other import functions: 
 \code{\link{import_DISCOVER_data}()},
 \code{\link{import_SALT_data}()},
+\code{\link{import_adjusted_infobase_data_backup}()},
 \code{\link{import_adjusted_infobase_data}()},
 \code{\link{import_demographic_data}()},
 \code{\link{import_hosp_data}()},

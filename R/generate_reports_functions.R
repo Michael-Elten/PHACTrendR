@@ -34,7 +34,7 @@ generate_trend_report<-function(report_date=""){
 generate_Nemer_report<-function(report_date=""){
 
   if (report_date==""){
-    report_date<-format(Sys.Date(), "%d%b%Y")
+    report_date<-format(Sys.Date(), "%Y-%m-%d")
   }
   library("rmarkdown")
   #eventually, can write to: Y:/PHAC/IDPCB/CIRID/VIPS-SAR/EMERGENCY PREPAREDNESS AND RESPONSE HC4/EMERGENCY EVENT/WUHAN UNKNOWN PNEU - 2020/EPI SUMMARY/Nemer Report

@@ -345,8 +345,11 @@ import_adjusted_infobase_data<-function(){
 
   ########### Hard-coded manual corrections
 
+  infobase_correction_sheet_URL<-"https://docs.google.com/spreadsheets/d/1lHTwMuZlGq8hXpiFMamy46jRkcBqetP16-1cYkfELJE"
+
   googlesheets4::gs4_deauth()
-  infobase_correction_info<-googlesheets4::read_sheet("https://docs.google.com/spreadsheets/d/1lHTwMuZlGq8hXpiFMamy46jRkcBqetP16-1cYkfELJE", sheet="data_table",
+  infobase_correction_info<-googlesheets4::read_sheet(infobase_correction_sheet_URL,
+                                                      sheet="data_table",
                                                       col_types="ccDddcc")
 
   correct_df<-function(data,metric="",Jurisdiction="",correction_date="",corrected_value=""){
@@ -498,8 +501,13 @@ return(list(latest_can_pop,pt_pop20))
 #' @family import functions
 #'
 import_hosp_data<-function(correct_AB=TRUE){
+
+
+
+
+spreadsheet_URL<-"https://docs.google.com/spreadsheets/d/17KL40qJ8tpFalFeBv1XDopTXaFm7z3Q9J2dtqqsQaJg"
 googlesheets4::gs4_deauth()
-hosp_data_raw<-googlesheets4::read_sheet("https://docs.google.com/spreadsheets/d/17KL40qJ8tpFalFeBv1XDopTXaFm7z3Q9J2dtqqsQaJg/edit?usp=sharing", sheet="hosp_and_icu") %>%
+hosp_data_raw<-googlesheets4::read_sheet(ss = spreadsheet_URL,sheet="hosp_and_icu") %>%
   dplyr::mutate(hosp=parse_number(as.character(hosp)),
          icu=parse_number(as.character(icu)))
 
@@ -588,25 +596,23 @@ return(all_hosp_data)
 #'
 import_DISCOVER_data<-function(method="extract", metabase_user="",metabase_pass=""){
 
-if (method=="extract"){
-qry_cases_raw <- readRDS("Y:/PHAC/IDPCB/CIRID/VIPS-SAR/EMERGENCY PREPAREDNESS AND RESPONSE HC4/EMERGENCY EVENT/WUHAN UNKNOWN PNEU - 2020/EPI SUMMARY/Trend analysis/_Current/_Source Data/CaseReportForm/trend_extract.rds") %>%
-  dplyr::mutate(onsetdate = as.Date(onsetdate),
-                episodedate=as.Date(episodedate),
-                earliestlabcollectiondate = as.Date(earliestlabcollectiondate),
-                earliestdate=as.Date(earliestdate)) %>%
-  dplyr::rename(age=age_years)
-} else if (method=="metabaser"){
+  if (method=="extract"){
+    qry_cases_raw <- readRDS("Y:/PHAC/IDPCB/CIRID/VIPS-SAR/EMERGENCY PREPAREDNESS AND RESPONSE HC4/EMERGENCY EVENT/WUHAN UNKNOWN PNEU - 2020/EPI SUMMARY/Trend analysis/_Current/_Source Data/CaseReportForm/trend_extract.rds") %>%
+      dplyr::mutate(onsetdate = as.Date(onsetdate),
+                    episodedate=as.Date(episodedate),
+                    earliestlabcollectiondate = as.Date(earliestlabcollectiondate),
+                    earliestdate=as.Date(earliestdate)) %>%
+      dplyr::rename(age=age_years)
+  }else if (method=="metabaser"){
 
-handle<- metabaser::metabase_login(base_url = "https://discover-metabase.hres.ca/api",
-                            database_id = 2, # phac database
-                            username = metabase_user,
-                            password = metabase_pass)
+    handle<- metabaser::metabase_login(base_url = "https://discover-metabase.hres.ca/api",
+                                database_id = 2, # phac database
+                                username = metabase_user,
+                                password = metabase_pass)
 
-qry_cases_raw <- metabaser::metabase_query(handle, "select phacid, phacreporteddate, episodedate, earliestdate, pt, age_years, agegroup10, agegroup20, onsetdate, earliestlabcollectiondate, sex, gender, sexgender, coviddeath, hosp, icu, exposure_cat from all_cases;") %>%
-rename(age=age_years)
-}
-
-
+    qry_cases_raw <- metabaser::metabase_query(handle, "select phacid, phacreporteddate, episodedate, earliestdate, pt, age_years, agegroup10, agegroup20, onsetdate, earliestlabcollectiondate, sex, gender, sexgender, coviddeath, hosp, icu, exposure_cat from all_cases;") %>%
+    rename(age=age_years)
+  }
   return(qry_cases_raw)
 }
 
